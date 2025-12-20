@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Trophy, Users, Lock, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://auction-backend-eta.vercel.app';
 const socket = io(API_BASE);
 
 // --- JOIN COMPONENT ---
