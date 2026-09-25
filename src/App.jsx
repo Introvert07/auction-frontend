@@ -411,10 +411,26 @@ const AuctionPage = ({
 // ---------------------------------------------------------------------------
 const AdminPanel = ({
   user, components, teams, activeItemId, btnLoading, bidIncrement,
-  connected, handleAction, logout
+  connected, handleAction, logout, componentsLoaded
 }) => {
   const [incrementInput, setIncrementInput] = useState(bidIncrement);
-  const [showSetup, setShowSetup] = useState(components.length === 0);
+  // FIX: don't decide this from `components.length` at first render — `components`
+  // in the parent always starts as [] before the API fetch resolves, so this used
+  // to force the Setup panel open on every admin refresh, even mid-auction.
+  // We now wait for the initial fetch to actually finish (componentsLoaded) before
+  // deciding, and only auto-open it once, the first time we learn the room is empty.
+  const [showSetup, setShowSetup] = useState(false);
+  const hasAutoOpenedSetup = useRef(false);
+
+  useEffect(() => {
+    if (componentsLoaded && !hasAutoOpenedSetup.current) {
+      hasAutoOpenedSetup.current = true;
+      if (components.length === 0) {
+        setShowSetup(true);
+      }
+    }
+  }, [componentsLoaded, components.length]);
+
   const [itemsText, setItemsText] = useState('');
   const [settingUp, setSettingUp] = useState(false);
   const [forceSellFor, setForceSellFor] = useState(null);
@@ -447,6 +463,17 @@ const AdminPanel = ({
         .filter((it) => it.name.length > 0);
 
       if (items.length === 0) return toast.error('Add at least one item: "Item Name, BasePrice"');
+    }
+
+    // FIX: guard against accidental wipes — if the room already has items/progress,
+    // require an explicit confirmation before deleting everyone's squads & purses.
+    if (components.length > 0) {
+      const confirmed = window.confirm(
+        `This room already has ${components.length} item(s) and team progress.\n\n` +
+        `Continuing will WIPE all items, bids, and reset every team's purse/squad back to default.\n\n` +
+        `Are you sure you want to continue?`
+      );
+      if (!confirmed) return;
     }
 
     setSettingUp(true);
@@ -555,6 +582,13 @@ const AdminPanel = ({
               <Sparkles size={16} /> Quick Start
             </h4>
             <p className="text-xs text-slate-400 mb-3">Load the default tech stack (React, Node, AI/ML, IoT, etc.)</p>
+            {/* FIX: this warning used to only show next to the custom-items textarea,
+                so clicking Quick Start on an already-active room gave no warning at all. */}
+            {components.length > 0 && (
+              <p className="text-[11px] text-red-400/80 mb-3">
+                ⚠️ This room already has {components.length} item(s) — starting again will wipe all items, bids, and reset every team's purse/squad.
+              </p>
+            )}
             <button
               onClick={() => submitRoomSetup(true)}
               disabled={settingUp}
@@ -812,6 +846,7 @@ function App() {
   });
 
   const [components, setComponents] = useState([]);
+  const [componentsLoaded, setComponentsLoaded] = useState(false); // FIX: tracks whether the first /api/components fetch has actually finished
   const [teams, setTeams] = useState([]);
   const [activeItemId, setActiveItemId] = useState(null);
   const [timerEndsAt, setTimerEndsAt] = useState(null);
@@ -852,6 +887,8 @@ function App() {
       setComponents(res.data);
     } catch (e) {
       console.error('Components fetch failed:', e);
+    } finally {
+      setComponentsLoaded(true); // FIX: mark loaded whether it succeeded or failed, so the Admin panel stops waiting
     }
   }, []);
 
@@ -1066,6 +1103,7 @@ function App() {
               handleAction={handleAction}
               logout={logout}
               timeLeft={timeLeft}
+              componentsLoaded={componentsLoaded}
             />
           ) : <Navigate to="/admin-login" />
         } />
