@@ -13,7 +13,7 @@ import toast, { Toaster } from 'react-hot-toast';
 // ---------------------------------------------------------------------------
 // API configuration
 // ---------------------------------------------------------------------------
-const API_BASE = import.meta.env.VITE_API_URL || "https://auction-backend-eta.vercel.app";
+const API_BASE = import.meta.env.VITE_API_URL || "https://auction-backend-newwwww.onrender.com";
 
 const socket = io(API_BASE, {
   transports: ['websocket', 'polling'],
