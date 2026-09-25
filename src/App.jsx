@@ -13,7 +13,7 @@ import toast, { Toaster } from 'react-hot-toast';
 // ---------------------------------------------------------------------------
 // API configuration
 // ---------------------------------------------------------------------------
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://auction-backend-eta.vercel.app/';
 
 const socket = io(API_BASE, {
   transports: ['websocket', 'polling'],
@@ -195,8 +195,8 @@ const JoinPage = ({ setUser, isAdmin = false }) => {
               onClick={handleJoin}
               disabled={loading}
               className={`w-full py-4 rounded-xl font-black text-sm tracking-wide transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 ${isAdmin
-                  ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
-                  : 'bg-gradient-to-r from-amber-500 to-amber-600 text-black'
+                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
+                : 'bg-gradient-to-r from-amber-500 to-amber-600 text-black'
                 }`}
             >
               {loading ? <Loader2 className="animate-spin" size={18} /> : (
@@ -389,7 +389,7 @@ const AuctionPage = ({
                   <h4 className="font-black uppercase text-[10px] truncate mb-2">{item.name}</h4>
                   <div className="space-y-1">
                     <div className="sold-badge w-full justify-center">
-                       {item.highestBidderName}
+                      {item.highestBidderName}
                     </div>
                     <p className="text-center text-[10px] text-slate-400 font-mono">{fmt(item.currentBid)}</p>
                   </div>
@@ -549,7 +549,7 @@ const AdminPanel = ({
           <h3 className="font-black text-xs mb-4 text-blue-400 uppercase tracking-wider">
             {components.length === 0 ? '⚡ Setup Room' : '🔄 Restart Room'}
           </h3>
-          
+
           <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
             <h4 className="font-bold text-amber-400 mb-2 text-sm flex items-center gap-2">
               <Sparkles size={16} /> Quick Start
